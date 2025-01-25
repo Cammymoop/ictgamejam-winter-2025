@@ -1,0 +1,116 @@
+[gd_scene load_steps=10 format=3 uid="uid://ba3exchryieal"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_enefo"]
+size = Vector2(10000, 10000)
+
+[sub_resource type="Gradient" id="Gradient_p445k"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.377049, 0.5, 0.614754, 0.819672, 0.918033, 1)
+colors = PackedColorArray(0.899258, 0.899258, 0.899258, 0, 0.901961, 0.901961, 0.901961, 0, 0.906308, 0.906308, 0.906308, 0.0699752, 0.909804, 0.909804, 0.909804, 0.345098, 0.894118, 0.905882, 0.92549, 1, 0.909804, 0.921569, 0.960784, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_v7ppl"]
+frequency = 0.002
+fractal_octaves = 10
+fractal_lacunarity = 1.9
+fractal_gain = 0.51
+domain_warp_enabled = true
+domain_warp_amplitude = 45.0
+domain_warp_frequency = 0.01
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_67ctl"]
+width = 2048
+height = 2048
+seamless = true
+color_ramp = SubResource("Gradient_p445k")
+noise = SubResource("FastNoiseLite_v7ppl")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ihijd"]
+transparency = 1
+albedo_texture = SubResource("NoiseTexture2D_67ctl")
+detail_uv_layer = 1
+uv1_scale = Vector3(0.001, 0.001, 0.001)
+uv1_triplanar = true
+uv2_scale = Vector3(0.001, 0.001, 0.001)
+distance_fade_mode = 1
+distance_fade_min_distance = 1850.0
+distance_fade_max_distance = 800.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q442c"]
+transparency = 1
+albedo_color = Color(0.125911, 0.125911, 0.125911, 1)
+albedo_texture = SubResource("NoiseTexture2D_67ctl")
+uv1_scale = Vector3(0.001, 0.001, 0.001)
+uv1_triplanar = true
+uv1_world_triplanar = true
+distance_fade_mode = 2
+distance_fade_min_distance = 2200.0
+distance_fade_max_distance = 1100.0
+
+[sub_resource type="Animation" id="Animation_p445k"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MeshInstance3D:surface_material_override/0:uv1_offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_enefo"]
+resource_name = "cloud_move"
+length = 12.0
+loop_mode = 1
+step = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MeshInstance3D:surface_material_override/0:uv1_offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 12),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(1, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("MeshInstance3D2:surface_material_override/0:uv1_offset")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 12),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(1, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_v7ppl"]
+_data = {
+&"RESET": SubResource("Animation_p445k"),
+&"cloud_move": SubResource("Animation_enefo")
+}
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_enefo")
+surface_material_override/0 = SubResource("StandardMaterial3D_ihijd")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -20.4935, 0)
+mesh = SubResource("PlaneMesh_enefo")
+surface_material_override/0 = SubResource("StandardMaterial3D_q442c")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+reset_on_save = false
+libraries = {
+&"": SubResource("AnimationLibrary_v7ppl")
+}
+autoplay = "cloud_move"

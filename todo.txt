@@ -1,0 +1,40 @@
+Game Jam winter 2025
+Theme: Bubble
+
+Brainstorming:
+
+1)
+Capture the flag on floating island, use largish bubbles as vehicles, shoot the other team's bubbles to pop them.
+pop bubbles over the void to temporarily knock out a player
+shoot the ground to make it slippery for enemies (splatoonishly?)
+shooting grounded players knocks them back, slightly
+
+I like the idea but it requires a lot of players/devices, also unsure about networking setup at the jam
+split screen can help with device number
+
+I think it's too much scope
+
+Alternatively:
+2)
+Same setting but...
+KOTH style 1v1
+Only one floating island, simply ring out to win, ridable bubbles at the edges to increase survivability
+slipperiness is symmetric, not based on who shot the ground, direct hits do very slight knockback, not very effective on dry ground
+edges are always slippery
+
+boost/dash, on a short cooldown, ramming can cause big knockback but missing could easily be fatal
+also good for getting back from the edge
+
+ridable bubbles:
+shrink over time and when getting shot, then pop.
+faster movement, but hard to slow down, can lead to overshooting the edge and being open to getting your bubble popped
+(perhaps movement influence is inversely proportional to current speed?)
+
+Rivers of bubbles as a fixed hazard, slippery and pushes
+
+2 fire buttons, hold one for auto fire, hold the other to grow a single bubble release to fire, larger bubbles travel faster/farther/more accurately
+
+bubble mine, sticks to the ground, can be moved around by shooting, touching it causes it to explode and knock upwards and away
+
+NOTE will need voluntary help playtesting a lot during the jam
+

@@ -92,7 +92,6 @@ func _input(event: InputEvent) -> void:
 	
 func mouse_look(event: InputEventMouseMotion) -> void:
 	if not mouse_is_captured():
-		print("MOTIONNN")
 		return
 	
 	camera.rotate_x(-event.relative.y * mouse_sensitivity)

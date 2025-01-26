@@ -25,6 +25,8 @@ extends Area3D
 
 @export_range(0.0, 1.0) var lifetime_deviance: float = 0.2
 
+@onready var small_area: Area3D = $small
+
 const SPLASHABLE_LAYER: int = 5
 
 var my_speed: float = 0.0
@@ -33,6 +35,8 @@ var curr_velocity: Vector3 = Vector3.ZERO
 var my_lifetime: float = 0.0
 var elapsed: float = 0.0
 
+var push_impulse: float = 30.0
+
 func up_down_rand(spread: float) -> float:
 	return randf_range(1 - spread, 1 + spread)
 
@@ -40,6 +44,8 @@ func _ready():
 	if disabled:
 		visible = false
 		set_physics_process(false)
+	
+	$MeshInstance3D.get_surface_override_material(0).albedo_color = color
 
 func start() -> void:
 	if disabled:
@@ -78,19 +84,16 @@ func _physics_process(delta):
 	position += curr_velocity * delta
 
 func _process(_delta):
-	for body in get_overlapping_bodies():
+	for body in small_area.get_overlapping_bodies():
 		var is_splashable = body.get_collision_layer_value(SPLASHABLE_LAYER)
 		if is_splashable:
 			detected_splashable(body)
 			return
-		else:
-			prints(body.name, body.collision_layer)
 
-#func _on_body_entered(body: CollisionObject3D) -> void:
-	#var is_splashable = body.get_collision_layer_value(SPLASHABLE_LAYER)
-	#if is_splashable:
-		#detected_splashable(body)
-		#return
+func _on_body_entered(body: CollisionObject3D) -> void:
+	print(body.name)
+	body.apply_central_impulse(push_impulse * curr_velocity.normalized())
+	queue_free()
 
 func detected_splashable(body: CollisionObject3D) -> void:
 	var paint_manager = get_node("/root/GameScene").get_paint_manager()

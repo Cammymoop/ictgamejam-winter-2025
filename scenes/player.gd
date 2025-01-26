@@ -145,9 +145,8 @@ func do_dynamic_friction(state: PhysicsDirectBodyState3D) -> void:
 			print_debug("no mesh instance parent of splashable collided thing")
 			continue
 		
-		#var dryness_sample: float = level_main.get_dryness_sample(mesh_instance, global_collision_point)
-		#min_dryness = min(min_dryness, dryness_sample)
-		min_dryness = 1.0
+		var dryness_sample: float = level_main.get_dryness_sample(mesh_instance, global_collision_point)
+		min_dryness = min(min_dryness, dryness_sample)
 	
 	if min_dryness > 0.98:
 		set_my_friction(friction_factor)

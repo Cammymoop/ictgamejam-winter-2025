@@ -1,8 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://d1bwn3i5lyff"]
+[gd_scene load_steps=7 format=3 uid="uid://p81f6t7oqf42"]
 
-[ext_resource type="Script" uid="uid://dhmkxufo2cbna" path="res://scenes/a_bubble.gd" id="1_4ewwi"]
-[ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="2_dvdn6"]
-[ext_resource type="PackedScene" uid="uid://cb7jmitp43lar" path="res://small.tscn" id="3_dvdn6"]
+[ext_resource type="Script" uid="uid://dhmkxufo2cbna" path="res://scenes/a_bubble.gd" id="1_spiu4"]
+[ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="2_fxtyn"]
+[ext_resource type="PackedScene" uid="uid://cb7jmitp43lar" path="res://small.tscn" id="3_fxtyn"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_ro0ie"]
 radius = 0.625649
@@ -14,7 +14,7 @@ transparency = 2
 alpha_scissor_threshold = 0.5
 alpha_antialiasing_mode = 0
 albedo_color = Color(0.877548, 0.365837, 0.734201, 1)
-albedo_texture = ExtResource("2_dvdn6")
+albedo_texture = ExtResource("2_fxtyn")
 rim_enabled = true
 rim = 0.04
 rim_tint = 0.54
@@ -25,8 +25,9 @@ distance_fade_max_distance = 70.0
 
 [node name="ABubble" type="Area3D"]
 collision_layer = 0
-collision_mask = 4
-script = ExtResource("1_4ewwi")
+collision_mask = 2
+script = ExtResource("1_spiu4")
+color = Color(0.415544, 0.791525, 0.440373, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_ro0ie")
@@ -36,6 +37,6 @@ mesh = SubResource("QuadMesh_64u5g")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_kk2rg")
 
-[node name="small" parent="." instance=ExtResource("3_dvdn6")]
+[node name="small" parent="." instance=ExtResource("3_fxtyn")]
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

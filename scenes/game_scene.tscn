@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=4 uid="uid://c0vtgn5kbc54a"]
+[gd_scene load_steps=34 format=4 uid="uid://c0vtgn5kbc54a"]
 
 [ext_resource type="Script" uid="uid://bip0x477as4el" path="res://addons/icosphere/IcosphereMesh.gd" id="1_w5aja"]
 [ext_resource type="Script" uid="uid://bvy0aqe7cioyq" path="res://scenes/game_scene.gd" id="1_y3j0m"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="6_kk2rg"]
 [ext_resource type="Script" uid="uid://r8nqdvaymcjo" path="res://scenes/bubble_emitter.gd" id="7_b5spy"]
 [ext_resource type="PackedScene" uid="uid://d1bwn3i5lyff" path="res://scenes/a_bubble.tscn" id="8_b5spy"]
+[ext_resource type="PackedScene" uid="uid://p81f6t7oqf42" path="res://scenes/a_bubble_2.tscn" id="11_tcjrq"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_onqr8"]
 sky_top_color = Color(0.291747, 0.63023, 0.864277, 1)
@@ -203,7 +204,6 @@ render_target_update_mode = 4
 
 [node name="Player" parent="SubViewportContainer/SubViewport" instance=ExtResource("3_ycayy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.62958, 4.39717, -3.94548)
-collision_layer = 3
 physics_material_override = SubResource("PhysicsMaterial_mw25s")
 grab_mouse = true
 
@@ -278,5 +278,16 @@ disabled = true
 wait_time = 0.1
 autostart = true
 
+[node name="BubbleEmitter2" type="Node3D" parent="Node3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.85534)
+script = ExtResource("7_b5spy")
+shootee = NodePath("../../SubViewportContainer2/SubViewport/Player")
+bubble_scene = ExtResource("11_tcjrq")
+
+[node name="Timer" type="Timer" parent="Node3D2/BubbleEmitter2"]
+wait_time = 0.1
+autostart = true
+
 [connection signal="timeout" from="MainIsland/Dryer" to="MainIsland" method="_on_dryer_timeout"]
 [connection signal="timeout" from="Node3D2/BubbleEmitter/Timer" to="Node3D2/BubbleEmitter" method="_on_timer_timeout"]
+[connection signal="timeout" from="Node3D2/BubbleEmitter2/Timer" to="Node3D2/BubbleEmitter2" method="_on_timer_timeout"]

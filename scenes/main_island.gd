@@ -9,7 +9,7 @@ var handled_surfaces: Dictionary = {}
 
 var fade_amt: float = 0.05
 var splash_radius_squared: float = 6.0
-# sharp ease out to 1
+# gradual ease in to 1
 var splash_falloff: float = 2.54
 
 # key: mesh_index, value: Dictionary[surface_index, VertexOctree]
@@ -18,7 +18,7 @@ var vertex_octrees: Dictionary = {}
 func _ready() -> void:
 	load_surfaces($SquooshIsland)
 
-func load_surfaces(mesh_instance: MeshInstance3D) -> void:
+func load_surfaces(mesh_instance: MeshInstance3D, debug_prints: bool = false) -> void:
 	var mesh_index = find_mesh_index(mesh_instance)
 	if mesh_index == -1:
 		mesh_index = len(handled_meshes)
@@ -36,9 +36,10 @@ func load_surfaces(mesh_instance: MeshInstance3D) -> void:
 		bounds = bounds.grow(0.1)
 		var octree = VertexOctree.new(bounds.position + bounds.size/2, bounds.size)
 		
-		prints("\nBuilding octree for surface", i)
-		prints("Bounds:", bounds)
-		prints("Octree center:", octree.center, "size:", octree.size)
+		if debug_prints:
+			prints("\nBuilding octree for surface", i)
+			prints("Bounds:", bounds)
+			prints("Octree center:", octree.center, "size:", octree.size)
 		
 		var vertex_positions = []
 		var vertex_count = 0
@@ -51,9 +52,10 @@ func load_surfaces(mesh_instance: MeshInstance3D) -> void:
 			octree.insert(vertex_pos, vi)
 			vertex_count += 1
 		
-		prints("First few vertex positions:", vertex_positions.slice(0, 5))
-		prints("Total vertices:", vertex_count)
-		prints("Octree structure:", octree.debug_print())
+		if debug_prints:
+			prints("First few vertex positions:", vertex_positions.slice(0, 5))
+			prints("Total vertices:", vertex_count)
+			prints("Octree structure:", octree.debug_print())
 		
 		vertex_octrees[mesh_index][i] = octree
 
@@ -61,13 +63,12 @@ func splash_meshes(meshes: Array[MeshInstance3D], global_pos: Vector3) -> void:
 	for mesh in meshes:
 		splash_mesh(mesh, global_pos)
 
-func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3) -> void:
+func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3, debug_prints: bool = false) -> void:
 	var mesh_index = find_mesh_index(mesh)
 	if mesh_index == -1:
 		return
 	
 	var painted_vertices: int = 0
-	var last_color: Color = Color.WHITE
 	var last_query_result: Dictionary
 	var radius = sqrt(splash_radius_squared) + 0.1
 	
@@ -88,19 +89,19 @@ func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3) -> void:
 			if dist <= radius:
 				vertices_in_range.append({"index": vi, "pos": vertex_pos, "dist": dist})
 		
-		prints("\nQuery at:", local_pos, "radius:", radius)
-		prints("Direct check found", len(vertices_in_range), "vertices:")
-		for v in vertices_in_range:
-			prints("  Vertex", v.index, "at", v.pos, "distance:", v.dist)
-		prints("Octree found", len(last_query_result.indices), "vertices:", last_query_result.indices)
-		prints("Searched nodes at levels:", last_query_result.searched_nodes.map(func(n): return n.level))
+		if debug_prints:
+			prints("\nQuery at:", local_pos, "radius:", radius)
+			prints("Direct check found", len(vertices_in_range), "vertices:")
+			for v in vertices_in_range:
+				prints("  Vertex", v.index, "at", v.pos, "distance:", v.dist)
+			prints("Octree found", len(last_query_result.indices), "vertices:", last_query_result.indices)
+			prints("Searched nodes at levels:", last_query_result.searched_nodes.map(func(n): return n.level))
 		
 		for vi in last_query_result.indices:
 			var vertex_pos = mt.get_vertex(vi)
 			var brush_strength = spatial_brush(vertex_pos, local_pos)
 			if brush_strength > 0.0:
 				var color: Color = mt.get_vertex_color(vi)
-				last_color = color
 				var wetness = max(-0.5, color.a - brush_strength)
 				color = Color(1.0, 0, color.b + brush_strength, wetness)
 				mt.set_vertex_color(vi, color)
@@ -108,9 +109,10 @@ func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3) -> void:
 		
 		mt_commit(mt, mesh, surface_index)
 	
-	prints("splash_mesh painted", painted_vertices, "vertices at", global_pos, 
-		"\n  searched", len(last_query_result.searched_nodes), "nodes at levels:", 
-		last_query_result.searched_nodes.map(func(n): return n.level), "\n")
+	if debug_prints:
+		prints("splash_mesh painted", painted_vertices, "vertices at", global_pos, 
+			"\n  searched", len(last_query_result.searched_nodes), "nodes at levels:", 
+			last_query_result.searched_nodes.map(func(n): return n.level), "\n")
 
 func mt_commit(mt: MeshDataTool, mesh: MeshInstance3D, surface_i: int) -> void:
 	mesh.mesh.surface_remove(surface_i)

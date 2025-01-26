@@ -42,7 +42,7 @@ func _ready() -> void:
 		set_player_number(2)
 	look_at_center()
 
-	level_main = find_parent("GameScene").get_paint_manager()
+	level_main = find_parent("GameScene").get_node("MainIsland")
 
 func set_player_number(number: int) -> void:
 	camera.update_layer(number)
@@ -145,8 +145,9 @@ func do_dynamic_friction(state: PhysicsDirectBodyState3D) -> void:
 			print_debug("no mesh instance parent of splashable collided thing")
 			continue
 		
-		var dryness_sample: float = level_main.get_dryness_sample(mesh_instance, global_collision_point)
-		min_dryness = min(min_dryness, dryness_sample)
+		#var dryness_sample: float = level_main.get_dryness_sample(mesh_instance, global_collision_point)
+		#min_dryness = min(min_dryness, dryness_sample)
+		min_dryness = 1.0
 	
 	if min_dryness > 0.98:
 		set_my_friction(friction_factor)

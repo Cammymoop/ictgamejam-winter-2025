@@ -276,7 +276,6 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-433.325, -242.738)
 flags/world_vertex_coords = true
 preview_params/TextureParameterTriplanar = "Object(NoiseTexture2D,\"resource_local_to_scene\":false,\"resource_name\":\"\",\"width\":512,\"height\":512,\"invert\":false,\"in_3d_space\":false,\"generate_mipmaps\":true,\"seamless\":true,\"seamless_blend_skirt\":0.06,\"as_normal_map\":false,\"bump_strength\":8.0,\"normalize\":true,\"color_ramp\":Object(Gradient,\"resource_local_to_scene\":false,\"resource_name\":\"\",\"interpolation_mode\":0,\"interpolation_color_space\":0,\"offsets\":PackedFloat32Array(0, 0.336066, 0.540984, 1),\"colors\":PackedColorArray(0.0630977, 0.166976, 0.201913, 1, 0.0791294, 0.105549, 0.143948, 1, 0.166144, 0.44468, 0.271402, 1, 0.31509, 0.819861, 0.473082, 1),\"script\":null)
 ,\"noise\":Object(FastNoiseLite,\"resource_local_to_scene\":false,\"resource_name\":\"\",\"noise_type\":1,\"seed\":0,\"frequency\":0.04,\"offset\":Vector3(0, 0, 0),\"fractal_type\":1,\"fractal_octaves\":5,\"fractal_lacunarity\":2.0,\"fractal_gain\":0.5,\"fractal_weighted_strength\":0.0,\"fractal_ping_pong_strength\":2.0,\"cellular_distance_function\":0,\"cellular_jitter\":1.0,\"cellular_return_type\":1,\"domain_warp_enabled\":false,\"domain_warp_type\":0,\"domain_warp_amplitude\":30.0,\"domain_warp_frequency\":0.05,\"domain_warp_fractal_type\":1,\"domain_warp_fractal_octaves\":5,\"domain_warp_fractal_lacunarity\":6.0,\"domain_warp_fractal_gain\":0.5,\"script\":null)

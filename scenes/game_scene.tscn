@@ -620,7 +620,7 @@ draw_pass_1 = SubResource("QuadMesh_mw25s")
 [node name="BubbleEmitter" type="Node3D" parent="Node3D2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.85534)
 script = ExtResource("7_b5spy")
-shootee = NodePath("../../SubViewportContainer/SubViewport/Player")
+shootee = NodePath("../../SubViewportContainer2/SubViewport/Player")
 
 [node name="ABubble" parent="Node3D2/BubbleEmitter" instance=ExtResource("8_b5spy")]
 disabled = true
@@ -632,7 +632,7 @@ autostart = true
 [node name="BubbleEmitter2" type="Node3D" parent="Node3D2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.85534)
 script = ExtResource("7_b5spy")
-shootee = NodePath("../../SubViewportContainer2/SubViewport/Player")
+shootee = NodePath("../../SubViewportContainer/SubViewport/Player")
 bubble_scene = ExtResource("11_tcjrq")
 
 [node name="Timer" type="Timer" parent="Node3D2/BubbleEmitter2"]

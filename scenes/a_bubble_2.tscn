@@ -25,7 +25,7 @@ distance_fade_max_distance = 70.0
 
 [node name="ABubble" type="Area3D"]
 collision_layer = 0
-collision_mask = 2
+collision_mask = 66
 script = ExtResource("1_spiu4")
 color = Color(0.415544, 0.791525, 0.440373, 1)
 
@@ -39,4 +39,5 @@ surface_material_override/0 = SubResource("StandardMaterial3D_kk2rg")
 
 [node name="small" parent="." instance=ExtResource("3_fxtyn")]
 
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

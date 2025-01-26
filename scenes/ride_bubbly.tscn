@@ -1,0 +1,110 @@
+[gd_scene load_steps=9 format=3 uid="uid://o10a46pyhofl"]
+
+[ext_resource type="Script" uid="uid://byej45piic0x2" path="res://scenes/ride_bubbly.gd" id="1_ucwhg"]
+[ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="1_yhmm4"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_64u5g"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y8w5k"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+albedo_texture = ExtResource("1_yhmm4")
+rim_enabled = true
+rim = 0.04
+billboard_mode = 1
+billboard_keep_scale = true
+distance_fade_mode = 2
+distance_fade_min_distance = 23.0
+distance_fade_max_distance = 4.0
+
+[sub_resource type="Animation" id="Animation_ucwhg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_yhmm4"]
+resource_name = "spin"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5, 3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 3.14159, 0), Vector3(0, 6.28319, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_r028p"]
+_data = {
+&"RESET": SubResource("Animation_ucwhg"),
+&"spin": SubResource("Animation_yhmm4")
+}
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_3val0"]
+radius = 1.08993
+
+[node name="RideBubbly" type="Node3D"]
+script = ExtResource("1_ucwhg")
+
+[node name="Scaler" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Scaler"]
+transform = Transform3D(1.38891, 0, 0, 0, 1.38891, 0, 0, 0, 1.38891, 0, 0, 0)
+mesh = SubResource("QuadMesh_64u5g")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Scaler"]
+transform = Transform3D(0.593713, 0, 0, 0, 0.593713, 0, 0, 0, 0.593713, -0.0884661, 0.149164, 0.268934)
+mesh = SubResource("QuadMesh_64u5g")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="Scaler"]
+transform = Transform3D(0.949048, 0, 0, 0, 0.949048, 0, 0, 0, 0.949048, 0.0705339, -0.154876, -0.124264)
+mesh = SubResource("QuadMesh_64u5g")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="Scaler"]
+transform = Transform3D(1.03311, 0, 0, 0, 1.03311, 0, 0, 0, 1.03311, 0.100661, 0.153125, 0.133899)
+mesh = SubResource("QuadMesh_64u5g")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="Scaler"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0145455, 0.0874978, -0.0376648)
+mesh = SubResource("QuadMesh_64u5g")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Scaler"]
+libraries = {
+&"": SubResource("AnimationLibrary_r028p")
+}
+autoplay = "spin"
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 64
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_3val0")
+
+[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]

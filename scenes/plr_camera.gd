@@ -5,7 +5,6 @@ func update_layer(new_layer: int) -> void:
 	var just_layer: = 1 << new_layer
 	cull_mask = all_layers
 
-	$Eye.layers = just_layer
-	$Eye2.layers = just_layer
-	$Mouth.layers = just_layer
+	for c in get_children():
+		c.layers = just_layer
 	set_cull_mask_value(new_layer + 1, false)

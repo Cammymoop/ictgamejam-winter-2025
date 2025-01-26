@@ -1,19 +1,19 @@
 [gd_resource type="ShaderMaterial" load_steps=5 format=3 uid="uid://dqg83wtv3wxk2"]
 
-[ext_resource type="Shader" uid="uid://c7qm7duyifwho" path="res://scenes/game_scene.tres" id="1_b5y17"]
+[ext_resource type="Shader" uid="uid://djgfcpf611r3b" path="res://scenes/ground_mat_vert_roughness_vshader.tres" id="1_b5y17"]
 
-[sub_resource type="Gradient" id="Gradient_y3j0m"]
+[sub_resource type="Gradient" id="Gradient_7s4cp"]
 offsets = PackedFloat32Array(0, 0.336066, 0.540984, 1)
 colors = PackedColorArray(0.0630977, 0.166976, 0.201913, 1, 0.0791294, 0.105549, 0.143948, 1, 0.166144, 0.44468, 0.271402, 1, 0.31509, 0.819861, 0.473082, 1)
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_rurhu"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_l6x6d"]
 frequency = 0.04
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_kk2rg"]
 seamless = true
 seamless_blend_skirt = 0.06
-color_ramp = SubResource("Gradient_y3j0m")
-noise = SubResource("FastNoiseLite_rurhu")
+color_ramp = SubResource("Gradient_7s4cp")
+noise = SubResource("FastNoiseLite_l6x6d")
 
 [resource]
 render_priority = 0
@@ -23,6 +23,6 @@ shader_parameter/WetShineDrop = 0.3
 shader_parameter/SlideToEdge2 = 0.6
 shader_parameter/SlideToEdge = 0.24
 shader_parameter/edging = 0.408
-shader_parameter/triplanar_scale = Vector3(0.13, 0.32, 0.13)
+shader_parameter/triplanar_scale = Vector3(0.21, 0.42, 0.21)
 shader_parameter/triplanar_offset = null
 shader_parameter/triplanar_sharpness = 0.5

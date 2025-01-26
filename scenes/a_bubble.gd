@@ -35,7 +35,7 @@ var curr_velocity: Vector3 = Vector3.ZERO
 var my_lifetime: float = 0.0
 var elapsed: float = 0.0
 
-var push_impulse: float = 30.0
+var push_impulse: float = 45.0
 
 func up_down_rand(spread: float) -> float:
 	return randf_range(1 - spread, 1 + spread)
@@ -93,7 +93,6 @@ func _process(_delta):
 func _on_body_entered(body: CollisionObject3D) -> void:
 	print(body.name)
 	body.apply_central_impulse(push_impulse * curr_velocity.normalized())
-	queue_free()
 
 func detected_splashable(body: CollisionObject3D) -> void:
 	var paint_manager = get_node("/root/GameScene").get_paint_manager()
@@ -104,3 +103,9 @@ func detected_splashable(body: CollisionObject3D) -> void:
 		return
 	paint_manager.splash_mesh(mesh_instance, global_position)
 	queue_free()
+
+
+
+func _on_area_entered(area:Area3D) -> void:
+	if area.get_collision_layer_value(7):
+		area.get_parent().got_hit()

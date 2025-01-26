@@ -1,0 +1,41 @@
+[gd_resource type="StandardMaterial3D" load_steps=6 format=3 uid="uid://et63wb170jlj"]
+
+[sub_resource type="Gradient" id="Gradient_3cyhs"]
+offsets = PackedFloat32Array(0, 0.418033, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.332881, 0.332881, 0.332881, 1, 0.74558, 0.74558, 0.74558, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_7d33o"]
+gradient = SubResource("Gradient_3cyhs")
+fill_from = Vector2(1, 0)
+fill_to = Vector2(1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_3cyhs"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_25q3p"]
+as_normal_map = true
+bump_strength = 3.5
+noise = SubResource("FastNoiseLite_3cyhs")
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7d33o"]
+as_normal_map = true
+bump_strength = 3.5
+noise = SubResource("FastNoiseLite_3cyhs")
+
+[resource]
+resource_local_to_scene = true
+albedo_color = Color(0.857542, 0.426416, 0.70423, 1)
+metallic = 0.22
+roughness = 0.4
+normal_enabled = true
+normal_texture = SubResource("NoiseTexture2D_7d33o")
+rim_enabled = true
+detail_enabled = true
+detail_blend_mode = 2
+detail_uv_layer = 1
+detail_albedo = SubResource("GradientTexture2D_7d33o")
+detail_normal = SubResource("NoiseTexture2D_25q3p")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.68179
+uv2_scale = Vector3(0.2, 0.9, 0.2)
+uv2_offset = Vector3(1.3, 1.5, -0.4)
+uv2_triplanar = true

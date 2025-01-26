@@ -7,8 +7,14 @@ var mouse_sensitivity: = 0.002
 var joystick_h_sensetivity: = 4
 var joystick_v_sensetivity: = 2
 
-const MOVE_SPEED_BASE = 360.0 * 60
-const JUMP_VELOCITY = 350.0
+const MOVE_SPEED_BASE = 320.0 * 60
+const MOVE_SPEED_AIR = 220.0 * 60
+const FLY_SPEED = 190.0 * 60
+
+const JUMP_VELOCITY = 230.0
+
+const BOOST_VELOCITY = 100.0 / 12
+const FLY_BOOST_VELOCITY = 80.0 / 12
 
 const LOOK_UP_LIMIT = PI * (3.0/8)
 const LOOK_DOWN_LIMIT = -PI * (1.0/4)
@@ -19,24 +25,36 @@ var player_prefix: = "p1_"
 var player_number: = 1
 
 var dynamic_friction: = true
-var friction_factor: = 0.4
+var friction_factor: = 0.6
 var friction_easing: = 3.0
 
 var level_main: Node
 
 const PLAYER_COLORS: = [ "db6db4", "5cae77" ]
 
+const default_prefixes: = [ "kb_", "con1_" ]
+
 @export var grab_mouse: = false
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera
+
+var was_on_ground: int = 0
+
+const DASH_RESET_TIME: = 1.2
+var dash_reset_timer: = 0.0
+
+const DASH_DAMP_INSTANTANEOUS: = 0.2
+
+const POINTS_TO_WIN: = 2
+
+const DEATH_PLANE: = -12.0
 
 func _ready() -> void:
 	#Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	update_cursor_vis()
 
 	if grab_mouse:
-		find_parent("GameScene").enable_player_mouse(self)
 		set_player_number(1)
 	else:
 		set_player_number(2)
@@ -44,13 +62,29 @@ func _ready() -> void:
 
 	level_main = find_parent("GameScene").get_node("MainIsland")
 
+func die() -> void:
+	var other_player_num: = 1 if player_number == 2 else 2
+	Points.in_match_points[other_player_num - 1] += 1
+	if Points.in_match_points[other_player_num - 1] >= POINTS_TO_WIN:
+		find_parent("GameScene").player_win(other_player_num)
+	else:
+		get_tree().reload_current_scene()
+
 func set_player_number(number: int) -> void:
 	camera.update_layer(number)
 	set_collision_layer_value(player_number + 1, false)
 	set_collision_layer_value(number + 1, true)
 	player_number = number
-	player_prefix = "p" + str(number) + "_"
+	player_prefix = Controller.prefixes[player_number - 1]
+	if player_prefix == "kb_":
+		find_parent("GameScene").enable_player_mouse(self)
+		if not mouse_is_captured():
+			toggle_mouse_capture()
+		
 	set_body_color(PLAYER_COLORS[player_number - 1])
+
+	if Points.in_match_points[player_number - 1] > 0:
+		get_parent().get_parent().get_node("CanvasLayer").visible = true
 
 func look_at_center() -> void:
 	var pos = Vector3.ZERO
@@ -60,7 +94,7 @@ func look_at_center() -> void:
 func set_body_color(color: String) -> void:
 	var clr: = Color.from_string(color, Color.MAGENTA)
 	$Body.get_surface_override_material(0).albedo_color = clr
-	$Head.get_surface_override_material(0).albedo_color = clr
+	$Head/Camera/HeadV.get_surface_override_material(0).albedo_color = clr
 
 func ac(action_name: String) -> String:
 	return player_prefix + action_name
@@ -115,26 +149,58 @@ func _physics_process(_delta: float) -> void:
 	# Handle jump.
 	var velocity: = linear_velocity
 
-	if Input.is_action_just_pressed(ac("jump")) and is_on_floor():
+	if Input.is_action_just_pressed(ac("jump")) and was_on_ground > 0:
 		apply_central_impulse(Vector3(0, JUMP_VELOCITY, 0))
 
 	var input_dir := Input.get_vector(ac("m_left"), ac("m_right"), ac("m_forward"), ac("m_back"))
 	var direction := (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	if direction:
-		velocity.x = direction.x * MOVE_SPEED_BASE
-		velocity.z = direction.z * MOVE_SPEED_BASE
+	var move_speed: = MOVE_SPEED_BASE if was_on_ground > 0 else MOVE_SPEED_AIR
+
+	if not is_riding:
+		if direction:
+			velocity.x = direction.x * move_speed
+			velocity.z = direction.z * move_speed
+		else:
+			velocity.x = move_toward(velocity.x, 0, move_speed)
+			velocity.z = move_toward(velocity.z, 0, move_speed)
 	else:
-		velocity.x = move_toward(velocity.x, 0, MOVE_SPEED_BASE)
-		velocity.z = move_toward(velocity.z, 0, MOVE_SPEED_BASE)
+		direction = (camera.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		velocity = direction * move_speed
 	
 	apply_central_force(velocity * _delta)
+
+	dash_reset_timer = max(0.0, dash_reset_timer - _delta)
+
+	if global_position.y < DEATH_PLANE:
+		die()
 	
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
-	if dynamic_friction:
+	was_on_ground = max(0, was_on_ground - 1)
+	if dynamic_friction and not is_riding:
 		do_dynamic_friction(state)
+	
+	if Input.is_action_just_pressed(ac("dash")):
+		if not can_dash():
+			return
+		linear_velocity = linear_velocity * DASH_DAMP_INSTANTANEOUS
+		var dir: = Vector3.ZERO
+		if was_on_ground > 0:
+			dir = -(head.global_transform.basis.rotated(head.global_transform.basis.x, PI * 0.1)).z
+			global_position += Vector3.UP * 0.1
+		else:
+			dir = -head.global_transform.basis.z
+		
+		var vel_impulse: float = FLY_BOOST_VELOCITY if is_riding else BOOST_VELOCITY
+		linear_velocity += dir * vel_impulse
+		dash_reset_timer = DASH_RESET_TIME
+	
+func can_dash() -> bool:
+	return dash_reset_timer <= 0.0
 
 func do_dynamic_friction(state: PhysicsDirectBodyState3D) -> void:
 	var min_dryness: = 1.0
+
+	var ground_found: bool = false
 	for i in state.get_contact_count():
 		var collision_body: PhysicsBody3D = state.get_contact_collider_object(i) as PhysicsBody3D
 		if collision_body == null or not collision_body.get_collision_layer_value(SPLASHABLE_LAYER):
@@ -145,9 +211,13 @@ func do_dynamic_friction(state: PhysicsDirectBodyState3D) -> void:
 			print_debug("no mesh instance parent of splashable collided thing")
 			continue
 		
+		ground_found = true
 		var dryness_sample: float = level_main.get_dryness_sample(mesh_instance, global_collision_point)
 		min_dryness = min(min_dryness, dryness_sample)
 	
+	if ground_found:
+		was_on_ground = 2
+
 	if min_dryness > 0.98:
 		set_my_friction(friction_factor)
 		return
@@ -172,3 +242,16 @@ func _exit_tree() -> void:
 	if mouse_controls_on:
 		if mouse_is_captured():
 			toggle_mouse_capture()
+
+
+var is_riding: = false
+
+func start_riding() -> void:
+	is_riding = true
+	gravity_scale = 0.0
+	linear_damp = 0.1
+
+func stop_riding() -> void:
+	is_riding = false
+	gravity_scale = 1.0
+	linear_damp = 0.0

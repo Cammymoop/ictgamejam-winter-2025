@@ -1,6 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://o10a46pyhofl"]
+[gd_scene load_steps=4 format=3 uid="uid://cap8dwuinxgl4"]
 
-[ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="1_3val0"]
+[ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="1_yhmm4"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_64u5g"]
 
@@ -8,7 +8,7 @@
 transparency = 2
 alpha_scissor_threshold = 0.5
 alpha_antialiasing_mode = 0
-albedo_texture = ExtResource("1_3val0")
+albedo_texture = ExtResource("1_yhmm4")
 rim_enabled = true
 rim = 0.04
 billboard_mode = 1

@@ -17,6 +17,8 @@ var vertex_octrees: Dictionary = {}
 
 func _ready() -> void:
 	load_surfaces($SquooshIsland)
+	load_surfaces($SquooshIsland2)
+	load_surfaces($SquooshIsland3)
 
 func load_surfaces(mesh_instance: MeshInstance3D, debug_prints: bool = false) -> void:
 	var mesh_index = find_mesh_index(mesh_instance)

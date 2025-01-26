@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cws2estoolub7" path="res://scenes/plr_camera.gd" id="3_qhqgy"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3vyb7"]
+resource_local_to_scene = true
 friction = 0.94
 bounce = 0.1
 
@@ -92,6 +93,8 @@ mass = 40.0
 physics_material_override = SubResource("PhysicsMaterial_3vyb7")
 can_sleep = false
 lock_rotation = true
+contact_monitor = true
+max_contacts_reported = 3
 script = ExtResource("1_g2els")
 
 [node name="Head" type="MeshInstance3D" parent="."]

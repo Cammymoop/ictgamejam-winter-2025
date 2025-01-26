@@ -25,6 +25,8 @@ extends Area3D
 
 @export_range(0.0, 1.0) var lifetime_deviance: float = 0.2
 
+const SPLASHABLE_LAYER: int = 5
+
 var my_speed: float = 0.0
 var my_direction: Vector3 = Vector3.FORWARD
 var curr_velocity: Vector3 = Vector3.ZERO
@@ -38,16 +40,21 @@ func _ready():
 	if disabled:
 		visible = false
 		set_physics_process(false)
+
+func start() -> void:
+	if disabled:
 		return
 
 	my_lifetime = up_down_rand(lifetime_deviance) * base_lifetime
 	my_speed = base_speed * speed_deviance
+	my_direction = -global_transform.basis.z
+	
 	if aim_spread > 0.0:
 		var rand_angle = randf_range(0.0, 2.0 * PI)
 		var spread_axis = Vector3(cos(rand_angle), sin(rand_angle), 0.0)
 
 		var rand_spread = ease(randf(), aim_spread_concentration) * aim_spread
-		my_direction = Vector3.FORWARD.rotated(spread_axis, rand_spread)
+		my_direction = my_direction.rotated(spread_axis, rand_spread)
 
 	curr_velocity = my_speed * my_direction
 
@@ -70,5 +77,27 @@ func _physics_process(delta):
 
 	position += curr_velocity * delta
 
+func _process(_delta):
+	for body in get_overlapping_bodies():
+		var is_splashable = body.get_collision_layer_value(SPLASHABLE_LAYER)
+		if is_splashable:
+			detected_splashable(body)
+			return
+		else:
+			prints(body.name, body.collision_layer)
 
+#func _on_body_entered(body: CollisionObject3D) -> void:
+	#var is_splashable = body.get_collision_layer_value(SPLASHABLE_LAYER)
+	#if is_splashable:
+		#detected_splashable(body)
+		#return
 
+func detected_splashable(body: CollisionObject3D) -> void:
+	var paint_manager = get_node("/root/GameScene").get_paint_manager()
+	var mesh_instance: MeshInstance3D = body.get_parent() as MeshInstance3D
+	if not mesh_instance:
+		prints("no MeshInstance3D as splashable parent")
+		queue_free()
+		return
+	paint_manager.splash_mesh(mesh_instance, global_position)
+	queue_free()

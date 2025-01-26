@@ -23,6 +23,8 @@ distance_fade_min_distance = 140.0
 distance_fade_max_distance = 70.0
 
 [node name="ABubble" type="Area3D"]
+collision_layer = 0
+collision_mask = 16
 script = ExtResource("1_4ewwi")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

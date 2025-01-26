@@ -5,6 +5,8 @@ extends Node3D
 
 
 func _on_timer_timeout() -> void:
+	if shootee_node and shootee_node.get_node_or_null("Head/Camera"):
+		shootee_node = shootee_node.get_node("Head/Camera")
 	if shootee_node == null:
 		return
 
@@ -12,3 +14,4 @@ func _on_timer_timeout() -> void:
 	add_child(bubble)
 	bubble.global_transform = shootee_node.global_transform
 	bubble.scale = Vector3.ONE
+	bubble.start()

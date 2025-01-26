@@ -1,5 +1,7 @@
 extends RigidBody3D
 
+const SPLASHABLE_LAYER = 5
+
 var mouse_sensitivity: = 0.002
 
 var joystick_h_sensetivity: = 4
@@ -15,6 +17,12 @@ var mouse_controls_on: = false
 var mouse_motion_signal: Signal
 var player_prefix: = "p1_"
 var player_number: = 1
+
+var dynamic_friction: = true
+var friction_factor: = 0.4
+var friction_easing: = 3.0
+
+var level_main: Node
 
 const PLAYER_COLORS: = [ "db6db4", "5cae77" ]
 
@@ -33,6 +41,8 @@ func _ready() -> void:
 	else:
 		set_player_number(2)
 	look_at_center()
+
+	level_main = find_parent("GameScene").get_paint_manager()
 
 func set_player_number(number: int) -> void:
 	camera.update_layer(number)
@@ -118,6 +128,34 @@ func _physics_process(_delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0, MOVE_SPEED_BASE)
 	
 	apply_central_force(velocity * _delta)
+	
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	if dynamic_friction:
+		do_dynamic_friction(state)
+
+func do_dynamic_friction(state: PhysicsDirectBodyState3D) -> void:
+	var min_dryness: = 1.0
+	for i in state.get_contact_count():
+		var collision_body: PhysicsBody3D = state.get_contact_collider_object(i) as PhysicsBody3D
+		if collision_body == null or not collision_body.get_collision_layer_value(SPLASHABLE_LAYER):
+			continue
+		var global_collision_point: = state.get_contact_collider_position(i)
+		var mesh_instance: MeshInstance3D = collision_body.get_parent() as MeshInstance3D
+		if mesh_instance == null:
+			print_debug("no mesh instance parent of splashable collided thing")
+			continue
+		
+		var dryness_sample: float = level_main.get_dryness_sample(mesh_instance, global_collision_point)
+		min_dryness = min(min_dryness, dryness_sample)
+	
+	if min_dryness > 0.98:
+		set_my_friction(friction_factor)
+		return
+	set_my_friction(friction_factor * ease(min_dryness, friction_easing))
+
+func set_my_friction(value: float) -> void:
+	physics_material_override.friction = value
+
 
 func _process(delta: float) -> void:
 	joystick_look(delta)

@@ -15,7 +15,7 @@ rim = 0.04
 billboard_mode = 1
 billboard_keep_scale = true
 distance_fade_mode = 2
-distance_fade_min_distance = 23.0
+distance_fade_min_distance = 60.0
 distance_fade_max_distance = 4.0
 
 [sub_resource type="Animation" id="Animation_ucwhg"]

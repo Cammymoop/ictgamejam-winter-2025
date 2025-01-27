@@ -176,6 +176,12 @@ con1_dash={
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":0,"button_index":2,"pressure":0.0,"pressed":false,"script":null)
 ]
 }
+con2_m_forward={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":1,"button_index":11,"pressure":0.0,"pressed":true,"script":null)
+, Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":1,"axis":1,"axis_value":-1.0,"script":null)
+]
+}
 con2_m_back={
 "deadzone": 0.2,
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":1,"button_index":12,"pressure":0.0,"pressed":false,"script":null)
@@ -236,6 +242,12 @@ con2_dash={
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":1,"button_index":2,"pressure":0.0,"pressed":false,"script":null)
 ]
 }
+con3_m_forward={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":2,"button_index":11,"pressure":0.0,"pressed":true,"script":null)
+, Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":2,"axis":1,"axis_value":-1.0,"script":null)
+]
+}
 con3_m_back={
 "deadzone": 0.2,
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":2,"button_index":12,"pressure":0.0,"pressed":false,"script":null)
@@ -294,6 +306,12 @@ con3_shoot_1={
 con3_dash={
 "deadzone": 0.2,
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":2,"button_index":2,"pressure":0.0,"pressed":false,"script":null)
+]
+}
+con4_m_forward={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":3,"button_index":11,"pressure":0.0,"pressed":true,"script":null)
+, Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":3,"axis":1,"axis_value":-1.0,"script":null)
 ]
 }
 con4_m_back={

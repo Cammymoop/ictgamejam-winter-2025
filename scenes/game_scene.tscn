@@ -502,7 +502,7 @@ size = Vector2i(652, 1080)
 render_target_update_mode = 4
 
 [node name="Player" parent="SubViewportContainer/SubViewport" instance=ExtResource("3_ycayy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.62958, 4.39717, -3.94548)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.62958, 6.93522, -3.94548)
 physics_material_override = SubResource("PhysicsMaterial_mw25s")
 
 [node name="Control" type="Control" parent="SubViewportContainer"]
@@ -553,10 +553,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.65942, 4.66845, 2.60599)
 physics_material_override = SubResource("PhysicsMaterial_tcjrq")
 grab_mouse = true
 
-[node name="CanvasLayer2" type="CanvasLayer" parent="SubViewportContainer2"]
+[node name="CanvasLayer" type="CanvasLayer" parent="SubViewportContainer2"]
 visible = false
 
-[node name="ColorRect" type="ColorRect" parent="SubViewportContainer2/CanvasLayer2"]
+[node name="ColorRect" type="ColorRect" parent="SubViewportContainer2/CanvasLayer"]
 anchors_preset = -1
 anchor_left = 0.25
 anchor_right = 0.25
@@ -568,7 +568,7 @@ rotation = 0.785398
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[node name="ColorRect2" type="ColorRect" parent="SubViewportContainer2/CanvasLayer2/ColorRect"]
+[node name="ColorRect2" type="ColorRect" parent="SubViewportContainer2/CanvasLayer/ColorRect"]
 layout_mode = 1
 anchors_preset = -1
 offset_left = 3.0

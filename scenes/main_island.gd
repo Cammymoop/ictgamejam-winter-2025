@@ -6,8 +6,10 @@ var handled_meshes: Array[MeshInstance3D]
 
 # key: mesh_index, value: {surface_index: MeshDataTool}
 var handled_surfaces: Dictionary = {}
+var handled_internal_meshes: Array[Mesh] = []
+var internal_mesh_tool: Array[MeshDataTool] = []
 
-var fade_amt: float = 0.05
+var fade_amt: float = 0.01
 var splash_radius_squared: float = 6.0
 # gradual ease in to 1
 var splash_falloff: float = 2.54
@@ -19,6 +21,8 @@ func _ready() -> void:
 	load_surfaces($SquooshIsland)
 	load_surfaces($SquooshIsland2)
 	load_surfaces($SquooshIsland3)
+	load_surfaces($SquooshIsland4)
+	load_surfaces($SquooshIsland5)
 
 func load_surfaces(mesh_instance: MeshInstance3D, debug_prints: bool = false) -> void:
 	var mesh_index = find_mesh_index(mesh_instance)
@@ -30,7 +34,13 @@ func load_surfaces(mesh_instance: MeshInstance3D, debug_prints: bool = false) ->
 	
 	for i in mesh_instance.mesh.get_surface_count():
 		var mt = MeshDataTool.new()
-		mt.create_from_surface(mesh_instance.mesh, i)
+		if mesh_instance.mesh in handled_internal_meshes:
+			var index = handled_internal_meshes.find(mesh_instance.mesh)
+			mt = internal_mesh_tool[index]
+		else:
+			mt.create_from_surface(mesh_instance.mesh, i)
+			handled_internal_meshes.append(mesh_instance.mesh)
+			internal_mesh_tool.append(mt)
 		handled_surfaces[mesh_index][i] = mt
 		
 		# Create and populate octree for this surface
@@ -61,11 +71,11 @@ func load_surfaces(mesh_instance: MeshInstance3D, debug_prints: bool = false) ->
 		
 		vertex_octrees[mesh_index][i] = octree
 
-func splash_meshes(meshes: Array[MeshInstance3D], global_pos: Vector3) -> void:
+func splash_meshes(meshes: Array[MeshInstance3D], global_pos: Vector3, big_splash: bool = false) -> void:
 	for mesh in meshes:
-		splash_mesh(mesh, global_pos)
+		splash_mesh(mesh, global_pos, big_splash)
 
-func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3, debug_prints: bool = false) -> void:
+func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3, big_splash: bool = false, debug_prints: bool = false) -> void:
 	var mesh_index = find_mesh_index(mesh)
 	if mesh_index == -1:
 		return
@@ -73,6 +83,10 @@ func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3, debug_prints: bool =
 	var painted_vertices: int = 0
 	var last_query_result: Dictionary
 	var radius = sqrt(splash_radius_squared) + 0.1
+	var base_brush_strength: = 1.0
+	if big_splash:
+		radius *= 4.0
+		base_brush_strength = 3.0
 	
 	# Transform global position to local space for each mesh
 	var local_pos = mesh.global_transform.inverse() * global_pos
@@ -101,7 +115,7 @@ func splash_mesh(mesh: MeshInstance3D, global_pos: Vector3, debug_prints: bool =
 		
 		for vi in last_query_result.indices:
 			var vertex_pos = mt.get_vertex(vi)
-			var brush_strength = spatial_brush(vertex_pos, local_pos)
+			var brush_strength = spatial_brush(vertex_pos, local_pos, radius) * base_brush_strength
 			if brush_strength > 0.0:
 				var color: Color = mt.get_vertex_color(vi)
 				var wetness = max(-0.5, color.a - brush_strength)
@@ -120,11 +134,11 @@ func mt_commit(mt: MeshDataTool, mesh: MeshInstance3D, surface_i: int) -> void:
 	mesh.mesh.surface_remove(surface_i)
 	mt.commit_to_surface(mesh.mesh, surface_i)
 
-func spatial_brush(pos1: Vector3, pos2: Vector3) -> float:
+func spatial_brush(pos1: Vector3, pos2: Vector3, radius_sq: float) -> float:
 	var distance_squared = pos1.distance_squared_to(pos2)
-	if distance_squared > splash_radius_squared:
+	if distance_squared > radius_sq:
 		return 0.0
-	var distance_result = 1 - (distance_squared / splash_radius_squared)
+	var distance_result = 1 - (distance_squared / radius_sq)
 	return ease(distance_result, splash_falloff)
 	
 

@@ -1,22 +1,119 @@
 [gd_scene load_steps=9 format=3 uid="uid://o10a46pyhofl"]
 
 [ext_resource type="Script" uid="uid://byej45piic0x2" path="res://scenes/ride_bubbly.gd" id="1_ucwhg"]
-[ext_resource type="Texture2D" uid="uid://dhp88ed3u5qnb" path="res://resources/circle_tex.png" id="1_yhmm4"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_64u5g"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y8w5k"]
-transparency = 2
-alpha_scissor_threshold = 0.5
-alpha_antialiasing_mode = 0
-albedo_texture = ExtResource("1_yhmm4")
-rim_enabled = true
-rim = 0.04
-billboard_mode = 1
-billboard_keep_scale = true
-distance_fade_mode = 2
-distance_fade_min_distance = 60.0
-distance_fade_max_distance = 4.0
+[sub_resource type="Shader" id="Shader_yhmm4"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.4.beta1's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+uniform float outer_radius : hint_range(0.01, 1.0, 0.01);
+uniform float inner_radius : hint_range(0.0, 0.99, 0.01);
+uniform float softness : hint_range(0.0, 1.0, 0.05);
+
+uniform vec4 albedo : source_color;
+
+uniform float distance_fade_min : hint_range(0.0, 4096.0, 0.01);
+uniform float distance_fade_max : hint_range(0.0, 4096.0, 0.01);
+uniform float alpha_scissor_threshold : hint_range(0.0, 1.0, 0.001);
+uniform ivec2 albedo_texture_size;
+uniform float point_size : hint_range(0.1, 128.0, 0.1);
+
+uniform float roughness : hint_range(0.0, 1.0);
+uniform sampler2D texture_roughness : hint_roughness_r, filter_linear_mipmap, repeat_enable;
+
+uniform float specular : hint_range(0.0, 1.0, 0.01);
+uniform float metallic : hint_range(0.0, 1.0, 0.01);
+
+uniform float rim : hint_range(0.0, 1.0, 0.01);
+uniform float rim_tint : hint_range(0.0, 1.0, 0.01);
+uniform sampler2D texture_rim : hint_default_white, filter_linear_mipmap, repeat_enable;
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+void vertex() {
+	UV = UV * uv1_scale.xy + uv1_offset.xy;
+
+	// Billboard Mode: Enabled
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
+			MAIN_CAM_INV_VIEW_MATRIX[0],
+			MAIN_CAM_INV_VIEW_MATRIX[1],
+			MAIN_CAM_INV_VIEW_MATRIX[2],
+			MODEL_MATRIX[3]);
+
+	// Billboard Keep Scale: Enabled
+	MODELVIEW_MATRIX = MODELVIEW_MATRIX * mat4(
+			vec4(length(MODEL_MATRIX[0].xyz), 0.0, 0.0, 0.0),
+			vec4(0.0, length(MODEL_MATRIX[1].xyz), 0.0, 0.0),
+			vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0),
+			vec4(0.0, 0.0, 0.0, 1.0));
+	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+
+	ALBEDO = albedo.rgb;
+
+	METALLIC = metallic;
+	SPECULAR = specular;
+
+	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
+	float roughness_tex = dot(texture(texture_roughness, base_uv), roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+	
+	vec2 new_uv = (UV.xy - 0.5) * 2.0;
+	float alpha_circle = step(inner_radius, length(new_uv)) - step(outer_radius, length(new_uv));
+	ALPHA *= albedo.a * alpha_circle;
+	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
+
+	{
+		// Distance Fade: Pixel Dither
+		float fade_distance = length(VERTEX);
+
+		// Use interleaved gradient noise, which is fast but still looks good.
+		const vec3 magic = vec3(0.06711056, 0.00583715, 52.9829189);
+		float fade = clamp(smoothstep(distance_fade_min, distance_fade_max, fade_distance), 0.0, 1.0);
+		// Use a hard cap to prevent a few stray pixels from remaining when past the fade-out distance.
+		if (fade < 0.001 || fade < fract(magic.z * fract(dot(FRAGCOORD.xy, magic.xy)))) {
+			discard;
+		}
+	}
+
+	// Rim: Enabled
+	vec2 rim_tex = texture(texture_rim, base_uv).xy;
+	RIM = rim * rim_tex.x;
+	RIM_TINT = rim_tint * rim_tex.y;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ucwhg"]
+render_priority = 0
+shader = SubResource("Shader_yhmm4")
+shader_parameter/outer_radius = 1.0
+shader_parameter/inner_radius = 0.78
+shader_parameter/softness = null
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/distance_fade_min = 60.0
+shader_parameter/distance_fade_max = 4.0
+shader_parameter/alpha_scissor_threshold = 0.01
+shader_parameter/albedo_texture_size = Vector2i(256, 256)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/rim = 0.04
+shader_parameter/rim_tint = 0.5
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="Animation" id="Animation_ucwhg"]
 length = 0.001
@@ -68,31 +165,31 @@ script = ExtResource("1_ucwhg")
 transform = Transform3D(1.38891, 0, 0, 0, 1.38891, 0, 0, 0, 1.38891, 0, 0, 0)
 mesh = SubResource("QuadMesh_64u5g")
 skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+surface_material_override/0 = SubResource("ShaderMaterial_ucwhg")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="Scaler"]
 transform = Transform3D(0.593713, 0, 0, 0, 0.593713, 0, 0, 0, 0.593713, -0.0884661, 0.149164, 0.268934)
 mesh = SubResource("QuadMesh_64u5g")
 skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+surface_material_override/0 = SubResource("ShaderMaterial_ucwhg")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="Scaler"]
 transform = Transform3D(0.949048, 0, 0, 0, 0.949048, 0, 0, 0, 0.949048, 0.0705339, -0.154876, -0.124264)
 mesh = SubResource("QuadMesh_64u5g")
 skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+surface_material_override/0 = SubResource("ShaderMaterial_ucwhg")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="Scaler"]
 transform = Transform3D(1.03311, 0, 0, 0, 1.03311, 0, 0, 0, 1.03311, 0.100661, 0.153125, 0.133899)
 mesh = SubResource("QuadMesh_64u5g")
 skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+surface_material_override/0 = SubResource("ShaderMaterial_ucwhg")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="Scaler"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0145455, 0.0874978, -0.0376648)
 mesh = SubResource("QuadMesh_64u5g")
 skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_y8w5k")
+surface_material_override/0 = SubResource("ShaderMaterial_ucwhg")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Scaler"]
 libraries = {

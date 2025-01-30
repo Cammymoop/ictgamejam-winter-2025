@@ -1,5 +1,7 @@
 extends RigidBody3D
 
+signal drop_ride
+
 const SPLASHABLE_LAYER = 5
 
 var mouse_sensitivity: = 0.002
@@ -16,8 +18,8 @@ const JUMP_VELOCITY = 230.0
 const BOOST_VELOCITY = 100.0 / 12
 const FLY_BOOST_VELOCITY = 80.0 / 12
 
-const LOOK_UP_LIMIT = PI * (3.0/8)
-const LOOK_DOWN_LIMIT = -PI * (1.0/4)
+const LOOK_UP_LIMIT = PI * (1.9/4)
+const LOOK_DOWN_LIMIT = -PI * (1.8/4)
 
 var mouse_controls_on: = false
 var mouse_motion_signal: Signal
@@ -41,14 +43,19 @@ const default_prefixes: = [ "kb_", "con1_" ]
 
 var was_on_ground: int = 0
 
-const DASH_RESET_TIME: = 1.2
+const DASH_RESET_TIME: = 3.2
+const DASH_ATTACK_TIME: = 0.6
 var dash_reset_timer: = 0.0
+
+const STUN_TIME: = 1.0
+var stunned: bool = false
+var stun_timer: = 0.0
 
 const DASH_DAMP_INSTANTANEOUS: = 0.2
 
 const POINTS_TO_WIN: = 2
 
-const DEATH_PLANE: = -12.0
+const DEATH_PLANE: = -32.0
 
 func _ready() -> void:
 	#Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -61,6 +68,9 @@ func _ready() -> void:
 	look_at_center()
 
 	level_main = find_parent("GameScene").get_node("MainIsland")
+
+func is_dash_attack_active() -> bool:
+	return dash_reset_timer <= DASH_ATTACK_TIME
 
 func die() -> void:
 	var other_player_num: = 1 if player_number == 2 else 2
@@ -145,31 +155,35 @@ func mouse_look(event: InputEventMouseMotion) -> void:
 func is_on_floor() -> bool:
 	return true
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	# Handle jump.
 	var velocity: = linear_velocity
 
-	if Input.is_action_just_pressed(ac("jump")) and was_on_ground > 0:
-		apply_central_impulse(Vector3(0, JUMP_VELOCITY, 0))
+	if not stunned:
+		if Input.is_action_just_pressed(ac("jump")) and was_on_ground > 0:
+			apply_central_impulse(Vector3(0, JUMP_VELOCITY, 0))
 
-	var input_dir := Input.get_vector(ac("m_left"), ac("m_right"), ac("m_forward"), ac("m_back"))
-	var direction := (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var move_speed: = MOVE_SPEED_BASE if was_on_ground > 0 else MOVE_SPEED_AIR
+		var input_dir := Input.get_vector(ac("m_left"), ac("m_right"), ac("m_forward"), ac("m_back"))
+		var direction := (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var move_speed: = MOVE_SPEED_BASE if was_on_ground > 0 else MOVE_SPEED_AIR
 
-	if not is_riding:
-		if direction:
-			velocity.x = direction.x * move_speed
-			velocity.z = direction.z * move_speed
+		if not is_riding:
+			if direction:
+				velocity.x = direction.x * move_speed
+				velocity.z = direction.z * move_speed
+			else:
+				velocity.x = move_toward(velocity.x, 0, move_speed)
+				velocity.z = move_toward(velocity.z, 0, move_speed)
 		else:
-			velocity.x = move_toward(velocity.x, 0, move_speed)
-			velocity.z = move_toward(velocity.z, 0, move_speed)
-	else:
-		direction = (camera.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		velocity = direction * move_speed
+			direction = (camera.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+			velocity = direction * move_speed
 	
-	apply_central_force(velocity * _delta)
+	apply_central_force(velocity * delta)
 
-	dash_reset_timer = max(0.0, dash_reset_timer - _delta)
+	dash_reset_timer = max(0.0, dash_reset_timer - delta)
+	stun_timer = max(0.0, stun_timer - delta)
+	if stun_timer <= 0.0:
+		stunned = false
 
 	if global_position.y < DEATH_PLANE:
 		die()
@@ -187,6 +201,8 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 		if was_on_ground > 0:
 			dir = -(head.global_transform.basis.rotated(head.global_transform.basis.x, PI * 0.1)).z
 			global_position += Vector3.UP * 0.1
+		elif is_riding:
+			dir = -camera.global_transform.basis.z
 		else:
 			dir = -head.global_transform.basis.z
 		
@@ -247,6 +263,8 @@ func _exit_tree() -> void:
 var is_riding: = false
 
 func start_riding() -> void:
+	if is_riding:
+		drop_ride.emit()
 	is_riding = true
 	gravity_scale = 0.0
 	linear_damp = 0.1
@@ -255,3 +273,13 @@ func stop_riding() -> void:
 	is_riding = false
 	gravity_scale = 1.0
 	linear_damp = 0.0
+
+func _on_body_entered(other_plr: Node3D) -> void:
+	if not other_plr.get_collision_layer_value(12):
+		return
+	
+	if not is_dash_attack_active() and other_plr.is_dash_attack_active():
+		stunned = true
+		var vel: Vector3 = other_plr.linear_velocity
+
+		apply_central_impulse(vel * 100.0)
